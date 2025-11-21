@@ -1,0 +1,26 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge--info {
+  background: rgba(155, 107, 67, 0.15);
+  color: #7c4f28;
+}
+
+.badge--success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #15803d;
+}
+
+.badge--warning {
+  background: rgba(245, 158, 11, 0.22);
+  color: #92400e;
+}
+

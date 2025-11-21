@@ -1,0 +1,14 @@
+{
+  "name": "frontend",
+  "private": true,
+  "description": "Wrapper scripts for the Vite storefront located in ./vite-project",
+  "scripts": {
+    "dev": "npm run dev --prefix vite-project",
+    "build": "npm run build --prefix vite-project",
+    "lint": "npm run lint --prefix vite-project",
+    "preview": "npm run preview --prefix vite-project"
+  },
+  "dependencies": {
+    "swiper": "^12.0.3"
+  }
+}

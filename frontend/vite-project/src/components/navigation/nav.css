@@ -1,0 +1,102 @@
+.main-nav {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: center;
+  padding: 1.8rem 0 2.2rem;
+}
+
+.nav-brand {
+  grid-column: span 3;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.nav-brand strong {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+}
+
+.nav-brand p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: rgba(155, 107, 67, 0.15);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+}
+
+.main-nav > .search-input {
+  grid-column: span 4;
+}
+
+.nav-links {
+  grid-column: span 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  justify-content: flex-end;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+.nav-links a {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+}
+
+.nav-links a:hover {
+  background: rgba(155, 107, 67, 0.08);
+}
+
+.main-nav .btn {
+  grid-column: span 1;
+  justify-self: end;
+}
+
+@media (max-width: 1024px) {
+  .main-nav {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .nav-brand,
+  .main-nav > .search-input,
+  .nav-links,
+  .main-nav .btn {
+    grid-column: span 6;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .main-nav > .search-input {
+    order: 3;
+  }
+
+  .nav-links {
+    order: 4;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+}
+

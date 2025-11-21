@@ -1,0 +1,26 @@
+.site-footer {
+  padding: 3rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+}
+
+.footer-title {
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.footer-links a {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
