@@ -2,21 +2,36 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
-  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  align-items: flex-end;
+  position: relative;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
 }
 
 .section-header h2 {
   margin: 0;
-  font-size: 1.85rem;
+  font-size: 2.5rem;
+  color: var(--color-secondary);
+  line-height: 1.1;
 }
 
 .section-label {
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.75rem;
-  color: var(--color-muted);
-  margin: 0 0 0.35rem;
+  letter-spacing: 0.15em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 0.5rem;
+  display: block;
 }
-

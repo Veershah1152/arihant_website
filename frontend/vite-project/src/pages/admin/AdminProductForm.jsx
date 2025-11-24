@@ -12,6 +12,7 @@ const AdminProductForm = () => {
         description: "",
         price: "",
         category: "",
+        isHidden: false,
     });
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -36,6 +37,7 @@ const AdminProductForm = () => {
             data.append("description", formData.description);
             data.append("price", formData.price);
             data.append("category", formData.category);
+            data.append("isHidden", formData.isHidden);
             if (file) {
                 data.append("file", file);
             }
@@ -57,63 +59,87 @@ const AdminProductForm = () => {
     };
 
     return (
-        <section className="admin-products" style={{ maxWidth: "600px" }}>
-            <SectionHeader title="Add New Product" subtitle="Admin Panel" />
+        <section className="admin-products">
+            <div className="panel" style={{ maxWidth: "700px", margin: "0 auto" }}>
+                <SectionHeader title="Add New Product" subtitle="Admin Panel" />
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "2rem" }}>
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Product Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginTop: "2rem" }}>
+                    <label>
+                        Product Name
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="e.g. Ceramic Vase"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </label>
 
-                <textarea
-                    name="description"
-                    placeholder="Product Description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows="4"
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
+                    <label>
+                        Description
+                        <textarea
+                            name="description"
+                            placeholder="Product details..."
+                            value={formData.description}
+                            onChange={handleChange}
+                            rows="5"
+                        />
+                    </label>
 
-                <input
-                    type="number"
-                    name="price"
-                    placeholder="Price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
+                    <div className="two-column">
+                        <label>
+                            Price ($)
+                            <input
+                                type="number"
+                                name="price"
+                                placeholder="0.00"
+                                value={formData.price}
+                                onChange={handleChange}
+                                required
+                            />
+                        </label>
 
-                <input
-                    type="text"
-                    name="category"
-                    placeholder="Category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
+                        <label>
+                            Category
+                            <input
+                                type="text"
+                                name="category"
+                                placeholder="e.g. Home Decor"
+                                value={formData.category}
+                                onChange={handleChange}
+                                required
+                            />
+                        </label>
+                    </div>
 
-                <div>
-                    <label style={{ display: "block", marginBottom: "0.5rem" }}>Product Image:</label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        style={{ padding: "10px" }}
-                    />
-                </div>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <input
+                            type="checkbox"
+                            name="isHidden"
+                            checked={formData.isHidden}
+                            onChange={(e) => setFormData({ ...formData, isHidden: e.target.checked })}
+                        />
+                        Hide Product (Keep in database but do not show on website)
+                    </label>
 
-                <PrimaryButton type="submit" disabled={loading}>
-                    {loading ? "Creating..." : "Create Product"}
-                </PrimaryButton>
-            </form>
+                    <label>
+                        Product Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            style={{ padding: "0.5rem" }}
+                        />
+                    </label>
+
+                    <div style={{ marginTop: "1rem" }}>
+                        <PrimaryButton type="submit" disabled={loading}>
+                            {loading ? "Creating..." : "Create Product"}
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </div>
         </section>
     );
 };

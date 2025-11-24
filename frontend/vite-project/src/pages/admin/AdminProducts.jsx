@@ -17,7 +17,7 @@ const AdminProducts = () => {
 
     const fetchProducts = async () => {
         try {
-            const { data } = await api.get("/products?limit=100");
+            const { data } = await api.get("/products?limit=100&showHidden=true");
             setProducts(data.products);
             setLoading(false);
         } catch (error) {
@@ -42,6 +42,22 @@ const AdminProducts = () => {
         }
     };
 
+    const handleToggleHidden = async (product) => {
+        try {
+            await api.put(`/products/${product._id}`, {
+                isHidden: !product.isHidden
+            }, {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            });
+            fetchProducts();
+        } catch (error) {
+            console.error("Error updating product:", error);
+            alert("Failed to update product status");
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
 
     return (
@@ -60,6 +76,7 @@ const AdminProducts = () => {
                         <th>Name</th>
                         <th>Category</th>
                         <th>Price</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -76,7 +93,19 @@ const AdminProducts = () => {
                             <td>{product.category}</td>
                             <td>${product.price}</td>
                             <td>
+                                <span className={`pill ${product.isHidden ? "pill--warning" : "pill--success"}`}>
+                                    {product.isHidden ? "Hidden" : "Visible"}
+                                </span>
+                            </td>
+                            <td>
                                 <div className="action-buttons">
+                                    <button
+                                        className="btn-secondary"
+                                        onClick={() => handleToggleHidden(product)}
+                                        style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                                    >
+                                        {product.isHidden ? "Show" : "Hide"}
+                                    </button>
                                     <Link to={`/admin/products/edit/${product._id}`}>
                                         <button className="btn-edit">Edit</button>
                                     </Link>

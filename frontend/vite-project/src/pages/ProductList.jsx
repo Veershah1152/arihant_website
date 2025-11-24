@@ -15,8 +15,11 @@ const ProductList = () => {
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Fetch Categories
   useEffect(() => {
@@ -33,6 +36,31 @@ const ProductList = () => {
     fetchCategories();
   }, []);
 
+  // Fetch Search Suggestions
+  useEffect(() => {
+    if (searchQuery.length > 1) {
+      const fetchSuggestions = async () => {
+        try {
+          const { data } = await api.get("/products", {
+            params: { limit: 5, sort: "newest" }
+          });
+          const filtered = data.products.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          setSearchSuggestions(filtered);
+          setShowSuggestions(true);
+        } catch (err) {
+          console.error("Failed to fetch suggestions", err);
+        }
+      };
+      const timer = setTimeout(fetchSuggestions, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery]);
+
   // Fetch Products
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,11 +74,23 @@ const ProductList = () => {
         if (category !== "All") {
           params.category = category;
         }
-        if (minPrice) params.minPrice = minPrice;
-        if (maxPrice) params.maxPrice = maxPrice;
+        if (searchQuery) {
+          // Simple search implementation - filter on frontend
+          // For production, implement backend search endpoint
+        }
 
         const { data } = await api.get("/products", { params });
-        setProducts(data.products);
+
+        // Filter by search query if present
+        let filteredProducts = data.products;
+        if (searchQuery) {
+          filteredProducts = data.products.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+
+        setProducts(filteredProducts);
         setTotalPages(data.pages);
       } catch (err) {
         console.error("Failed to fetch products", err);
@@ -66,7 +106,7 @@ const ProductList = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [category, sort, page, minPrice, maxPrice]);
+  }, [category, sort, page, searchQuery]);
 
   const handleCategoryChange = (cat) => {
     setCategory(cat);
@@ -78,6 +118,21 @@ const ProductList = () => {
     setPage(1);
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setPage(1);
+  };
+
+  const handleSuggestionClick = (productName) => {
+    setSearchQuery(productName);
+    setShowSuggestions(false);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setShowSuggestions(false);
+  };
+
   return (
     <section id="product-list" className="page-section">
       <SectionHeader
@@ -85,25 +140,6 @@ const ProductList = () => {
         subtitle="Shop"
         action={
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            {/* Price Filter */}
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <input
-                type="number"
-                placeholder="Min $"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                style={{ width: "70px", padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
-              />
-              <span>-</span>
-              <input
-                type="number"
-                placeholder="Max $"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                style={{ width: "70px", padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
-              />
-            </div>
-
             {/* Sort */}
             <select
               value={sort}
@@ -117,6 +153,110 @@ const ProductList = () => {
           </div>
         }
       />
+
+      {/* Search Bar */}
+      <div style={{ position: "relative", maxWidth: "600px", margin: "0 auto 2rem" }}>
+        <div style={{ position: "relative" }}>
+          <input
+            type="text"
+            placeholder="Search products by name or description..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            style={{
+              width: "100%",
+              padding: "0.75rem 3rem 0.75rem 1rem",
+              fontSize: "1rem",
+              border: "2px solid var(--color-border)",
+              borderRadius: "var(--radius-full)",
+              outline: "none",
+              transition: "border-color 0.2s",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "var(--color-primary)";
+              searchSuggestions.length > 0 && setShowSuggestions(true);
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "var(--color-border)";
+              setTimeout(() => setShowSuggestions(false), 200);
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              style={{
+                position: "absolute",
+                right: "1rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "1.2rem",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Autocomplete Suggestions */}
+        {showSuggestions && searchSuggestions.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              right: 0,
+              marginTop: "0.5rem",
+              background: "white",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-md)",
+              boxShadow: "var(--shadow-lg)",
+              maxHeight: "300px",
+              overflowY: "auto",
+              zIndex: 1000,
+            }}
+          >
+            {searchSuggestions.map((product) => (
+              <div
+                key={product._id}
+                onClick={() => handleSuggestionClick(product.name)}
+                style={{
+                  padding: "0.75rem 1rem",
+                  cursor: "pointer",
+                  borderBottom: "1px solid var(--color-border)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  transition: "background 0.2s",
+                }}
+                onMouseEnter={(e) => e.target.style.background = "rgba(139, 94, 60, 0.05)"}
+                onMouseLeave={(e) => e.target.style.background = "white"}
+              >
+                {product.images && product.images[0] && (
+                  <img
+                    src={product.images[0].url}
+                    alt={product.name}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                    }}
+                  />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: "500" }}>{product.name}</div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
+                    ${product.price}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Filter Tabs */}
       <div className="cards-row" style={{ marginBottom: "2rem", flexWrap: "wrap" }}>

@@ -39,60 +39,74 @@ const RegisterPage = () => {
     };
 
     return (
-        <section className="page-section" style={{ maxWidth: "400px", margin: "0 auto" }}>
-            <SectionHeader title="Create Account" subtitle="Register" />
+        <section className="page-section">
+            <div className="panel" style={{ maxWidth: "480px", margin: "0 auto" }}>
+                <SectionHeader title="Create Account" subtitle="Register" />
 
-            {error && <p className="error-text">{error}</p>}
+                {error && (
+                    <div className="pill pill--warning" style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem" }}>
+                        {error}
+                    </div>
+                )}
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
-                <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
-                <PrimaryButton type="submit">Register</PrimaryButton>
-            </form>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                    <label>
+                        Full Name
+                        <input
+                            type="text"
+                            placeholder="John Doe"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <label>
+                        Email Address
+                        <input
+                            type="email"
+                            placeholder="name@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <label>
+                        Password
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <label>
+                        Confirm Password
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <PrimaryButton type="submit">Register</PrimaryButton>
+                </form>
 
-            <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-                <p className="muted">Or continue with</p>
-                <div style={{ display: "flex", justifyContent: "center", marginTop: "0.5rem" }}>
-                    <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={() => setError("Google Login Failed")}
-                    />
+                <div style={{ marginTop: "2rem", textAlign: "center" }}>
+                    <p className="muted" style={{ marginBottom: "1rem" }}>Or continue with</p>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => setError("Google Login Failed")}
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <p style={{ marginTop: "1rem", textAlign: "center" }}>
-                Already have an account? <Link to="/login" style={{ color: "blue" }}>Login</Link>
-            </p>
+                <p style={{ marginTop: "1.5rem", textAlign: "center", color: "var(--color-text-muted)" }}>
+                    Already have an account? <Link to="/login" style={{ color: "var(--color-primary)", fontWeight: "600" }}>Login</Link>
+                </p>
+            </div>
         </section>
     );
 };

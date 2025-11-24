@@ -27,6 +27,24 @@ const userSchema = mongoose.Schema(
         avatar: {
             type: String,
         },
+        wishlist: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Product",
+            },
+        ],
+        address: {
+            type: String,
+            default: "",
+        },
+        phoneNumber: {
+            type: String,
+            default: "",
+        },
+        phoneVerified: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,

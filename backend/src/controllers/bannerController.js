@@ -42,3 +42,34 @@ export const createBanner = asyncHandler(async (req, res) => {
     const saved = await banner.save();
     res.status(201).json(saved);
 });
+
+// Delete banner
+export const deleteBanner = asyncHandler(async (req, res) => {
+    const banner = await Banner.findById(req.params.id);
+
+    if (banner) {
+        // Optional: Delete from Cloudinary
+        if (banner.image && banner.image.public_id) {
+            await cloudinary.uploader.destroy(banner.image.public_id);
+        }
+        await banner.deleteOne();
+        res.json({ message: "Banner removed" });
+    } else {
+        res.status(404);
+        throw new Error("Banner not found");
+    }
+});
+
+// Update banner status
+export const updateBannerStatus = asyncHandler(async (req, res) => {
+    const banner = await Banner.findById(req.params.id);
+
+    if (banner) {
+        banner.isActive = !banner.isActive;
+        const updatedBanner = await banner.save();
+        res.json(updatedBanner);
+    } else {
+        res.status(404);
+        throw new Error("Banner not found");
+    }
+});

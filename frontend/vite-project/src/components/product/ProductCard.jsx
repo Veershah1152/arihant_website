@@ -18,6 +18,9 @@ const ProductCard = ({ product, size = "md" }) => {
           loading="lazy"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
+        <div className="product-card__overlay">
+          <span className="btn-quick-view">View Details</span>
+        </div>
       </div>
       <div className="product-card__body">
         <div className="product-card__header">

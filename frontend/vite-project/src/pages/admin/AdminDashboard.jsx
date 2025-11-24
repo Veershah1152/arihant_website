@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
-import SectionHeader from "../others/SectionHeader";
+import SectionHeader from "../../components/others/SectionHeader";
 import "./admin.css";
 
 const AdminDashboard = () => {
@@ -10,8 +10,11 @@ const AdminDashboard = () => {
     const adminCards = [
         { title: "Products", path: "/admin/products", icon: "📦", desc: "Manage products" },
         { title: "Banners", path: "/admin/banners", icon: "🖼️", desc: "Manage hero banners" },
+        { title: "Analytics", path: "/admin/analytics", icon: "bar_chart", desc: "View site stats" },
         { title: "Orders", path: "/admin/orders", icon: "📋", desc: "View orders" },
         { title: "Users", path: "/admin/users", icon: "👥", desc: "Manage users" },
+        { title: "Reviews", path: "/admin/reviews", icon: "⭐", desc: "View product reviews" },
+        { title: "Coupons", path: "/admin/coupons", icon: "🎟️", desc: "Manage discounts" },
     ];
 
     return (

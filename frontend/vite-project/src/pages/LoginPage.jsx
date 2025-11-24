@@ -33,44 +33,54 @@ const LoginPage = () => {
     };
 
     return (
-        <section className="page-section" style={{ maxWidth: "400px", margin: "0 auto" }}>
-            <SectionHeader title="Welcome Back" subtitle="Login" />
+        <section className="page-section">
+            <div className="panel" style={{ maxWidth: "480px", margin: "0 auto" }}>
+                <SectionHeader title="Welcome Back" subtitle="Login" />
 
-            {error && <p className="error-text">{error}</p>}
+                {error && (
+                    <div className="pill pill--warning" style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem" }}>
+                        {error}
+                    </div>
+                )}
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-                />
-                <PrimaryButton type="submit">Sign In</PrimaryButton>
-            </form>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                    <label>
+                        Email Address
+                        <input
+                            type="email"
+                            placeholder="name@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <label>
+                        Password
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <PrimaryButton type="submit">Sign In</PrimaryButton>
+                </form>
 
-            <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-                <p className="muted">Or continue with</p>
-                <div style={{ display: "flex", justifyContent: "center", marginTop: "0.5rem" }}>
-                    <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={() => setError("Google Login Failed")}
-                    />
+                <div style={{ marginTop: "2rem", textAlign: "center" }}>
+                    <p className="muted" style={{ marginBottom: "1rem" }}>Or continue with</p>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => setError("Google Login Failed")}
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <p style={{ marginTop: "1rem", textAlign: "center" }}>
-                New customer? <Link to="/register" style={{ color: "blue" }}>Create an account</Link>
-            </p>
+                <p style={{ marginTop: "1.5rem", textAlign: "center", color: "var(--color-text-muted)" }}>
+                    New customer? <Link to="/register" style={{ color: "var(--color-primary)", fontWeight: "600" }}>Create an account</Link>
+                </p>
+            </div>
         </section>
     );
 };

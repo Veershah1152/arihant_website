@@ -1,20 +1,23 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
+import CartContext from "../../context/CartContext";
 import "./nav.css";
 
 const navLinks = [
   { path: "/", label: "Home" },
-  { path: "/shop", label: "Collections" },
+  { path: "/shop", label: "Collection" },
+  { path: "/about", label: "About" },
 ];
 
 const MainNav = () => {
   const { user, logout } = useContext(AuthContext);
+  const { cartItems } = useContext(CartContext);
 
   return (
     <nav className="main-nav">
       {/* Brand Logo + Name */}
-      <Link to="/" className="nav-brand" style={{ textDecoration: "none", color: "inherit" }}>
+      <Link to="/" className="nav-brand">
         <span className="brand-mark">🪞</span>
         <div>
           <strong>ARIHANT JWELLERS</strong>
@@ -23,30 +26,31 @@ const MainNav = () => {
       </Link>
 
       {/* Navigation Links */}
-      <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+      <div className="nav-links">
         {navLinks.map((link) => (
           <Link key={link.label} to={link.path}>
             {link.label}
           </Link>
         ))}
 
+        <Link to="/cart" className="cart-link">
+          Cart {cartItems.length > 0 && <span className="cart-badge">{cartItems.length}</span>}
+        </Link>
+
         {/* Admin Link - Only for Admin Users */}
         {user?.isAdmin && (
-          <Link to="/admin" style={{ color: "#4CAF50", fontWeight: "600" }}>
+          <Link to="/admin" className="admin-link">
             Admin
           </Link>
         )}
 
         {user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span>Hi, {user.name.split(" ")[0]}</span>
-            <button
-              onClick={logout}
-              style={{ background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
-            >
+          <>
+            <Link to="/Dashboard">UserDashboard</Link>
+            <button onClick={logout} className="logout-btn">
               Logout
             </button>
-          </div>
+          </>
         ) : (
           <Link to="/login">Login</Link>
         )}

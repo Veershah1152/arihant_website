@@ -1,30 +1,47 @@
+import { Link } from "react-router-dom";
 import "./footer.css";
 
 const footerLinks = [
   { title: "Shop", items: ["New Arrivals", "Best Sellers", "Gift Cards"] },
   { title: "Support", items: ["Help Center", "Shipping", "Returns"] },
-  { title: "Company", items: ["About", "Careers", "Press"] },
+  { title: "Company", items: ["About", "Careers"] },
 ];
 
 const SiteFooter = () => (
   <footer className="site-footer">
-    <div>
-      <strong>NovaCommerce</strong>
-      <p className="muted">Static UI built with React + Vite</p>
+    <div className="footer-content">
+      <div className="footer-brand">
+        <strong>Arihant Jewellers</strong>
+        <p className="muted">Exquisite jewellery with transparency and trust.</p>
+      </div>
+
+      <div className="footer-links">
+        {footerLinks.map((group) => (
+          <div key={group.title}>
+            <p className="footer-title">{group.title}</p>
+            {group.items.map((item) => {
+              if (item === "About") return <Link key={item} to="/about">{item}</Link>;
+              if (["New Arrivals", "Best Sellers", "Gift Cards"].includes(item)) return <Link key={item} to="/">{item}</Link>;
+              if (["Help Center", "Shipping", "Returns"].includes(item)) return <Link key={item} to="/about">{item}</Link>;
+
+              return (
+                <a key={item} href="#">
+                  {item}
+                </a>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
-    <div className="footer-links">
-      {footerLinks.map((group) => (
-        <div key={group.title}>
-          <p className="footer-title">{group.title}</p>
-          {group.items.map((item) => (
-            <a key={item} href="#">
-              {item}
-            </a>
-          ))}
-        </div>
-      ))}
+
+    <div className="footer-legal">
+      <p className="muted" style={{ fontSize: "0.9rem", marginTop: "2rem", borderTop: "1px solid var(--color-border)", paddingTop: "1rem" }}>
+        © {new Date().getFullYear()} Arihant Jewellers. All rights reserved. Based in Nashik, Maharashtra.
+        By using our site, you agree to our <Link to="/legal">Terms & Conditions</Link>, <Link to="/legal">Privacy Policy</Link>, and <Link to="/legal">Shipping & Refund Policies</Link>.
+        For support, contact us at <a href="mailto:arihantsilver@gmail.com">arihantsilver@gmail.com</a>.
+      </p>
     </div>
-    <p className="muted">© {new Date().getFullYear()} NovaCommerce Concepts</p>
   </footer>
 );
 

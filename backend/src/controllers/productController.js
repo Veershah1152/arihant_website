@@ -24,7 +24,7 @@ async function uploadBufferToCloudinary(fileBuffer, originalname) {
 // - OR single file in req.file (field name 'file')
 // Fields expected: name, description, price, category
 export const createProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, category } = req.body;
+  const { name, description, price, category, isHidden } = req.body;
   if (!name || !price) {
     res.status(400);
     throw new Error("Name and price are required");
@@ -52,6 +52,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     description,
     price: Number(price),
     category,
+    isHidden: isHidden === 'true' || isHidden === true,
     images: uploadedImages
   });
 
@@ -61,13 +62,17 @@ export const createProduct = asyncHandler(async (req, res) => {
 
 // Get all products with filtering, sorting, and pagination
 export const getProducts = asyncHandler(async (req, res) => {
-  const { category, minPrice, maxPrice, sort, page = 1, limit = 10 } = req.query;
+  const { category, minPrice, maxPrice, sort, page = 1, limit = 10, showHidden } = req.query;
 
   // Build query object
   const query = {};
 
   if (category) {
     query.category = category;
+  }
+
+  if (showHidden !== 'true') {
+    query.isHidden = false;
   }
 
   if (minPrice || maxPrice) {
@@ -122,7 +127,7 @@ export const getProductById = asyncHandler(async (req, res) => {
 
 // Update product
 export const updateProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, category } = req.body;
+  const { name, description, price, category, isHidden } = req.body;
   const product = await Product.findById(req.params.id);
 
   if (product) {
@@ -130,6 +135,9 @@ export const updateProduct = asyncHandler(async (req, res) => {
     product.description = description || product.description;
     product.price = price || product.price;
     product.category = category || product.category;
+    if (isHidden !== undefined) {
+      product.isHidden = isHidden;
+    }
 
     // Handle image upload if files are present
     let filesArray = [];
@@ -173,6 +181,65 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Product not found");
   }
+});
+
+// @desc    Create new review
+// @route   POST /api/products/:id/reviews
+// @access  Private
+export const createProductReview = asyncHandler(async (req, res) => {
+  const { rating, comment } = req.body;
+
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyReviewed) {
+      res.status(400);
+      throw new Error("Product already reviewed");
+    }
+
+    const review = {
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+      user: req.user._id,
+    };
+
+    product.reviews.push(review);
+
+    product.numReviews = product.reviews.length;
+
+    product.rating =
+      product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+      product.reviews.length;
+
+    await product.save();
+    res.status(201).json({ message: "Review added" });
+  } else {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+});
+
+// @desc    Get all reviews (Admin)
+// @route   GET /api/products/reviews
+// @access  Private/Admin
+export const getAllReviews = asyncHandler(async (req, res) => {
+  const products = await Product.find({}).select('name reviews');
+  let allReviews = [];
+  products.forEach(product => {
+    product.reviews.forEach(review => {
+      allReviews.push({
+        ...review.toObject(),
+        productName: product.name,
+        productId: product._id
+      });
+    });
+  });
+  res.json(allReviews);
 });
 
 // Get all distinct categories

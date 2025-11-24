@@ -1,0 +1,140 @@
+.feature-steps {
+    padding: 4rem 2rem;
+    background: var(--color-background);
+}
+
+.feature-steps__container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-steps__title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--color-secondary);
+}
+
+.feature-steps__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+@media (min-width: 768px) {
+    .feature-steps__grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+    }
+}
+
+.feature-steps__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    order: 2;
+}
+
+@media (min-width: 768px) {
+    .feature-steps__list {
+        order: 1;
+    }
+}
+
+.feature-step {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: opacity 0.5s ease;
+}
+
+.feature-step--inactive {
+    opacity: 0.4;
+}
+
+.feature-step__number {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.feature-step--active .feature-step__number {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.feature-step__content {
+    flex: 1;
+}
+
+.feature-step__title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-secondary);
+}
+
+.feature-step__description {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.feature-steps__image-container {
+    position: relative;
+    height: 300px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    order: 1;
+    box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+    .feature-steps__image-container {
+        height: 400px;
+        order: 2;
+    }
+}
+
+@media (min-width: 1024px) {
+    .feature-steps__image-container {
+        height: 500px;
+    }
+}
+
+.feature-steps__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.feature-steps__image--active {
+    opacity: 1;
+}
+
+.feature-steps__image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(to top, var(--color-background), transparent);
+    pointer-events: none;
+}
