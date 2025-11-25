@@ -11,6 +11,8 @@ const AdminOrders = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedOrderId, setExpandedOrderId] = useState(null);
+    const [filterStatus, setFilterStatus] = useState("all"); // all, pending, delivered
+    const [searchTerm, setSearchTerm] = useState("");
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
@@ -53,6 +55,33 @@ const AdminOrders = () => {
         setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
     };
 
+    // Filter orders based on status and search
+    const filteredOrders = orders.filter(order => {
+        // Filter by status
+        if (filterStatus === "pending" && order.isDelivered) return false;
+        if (filterStatus === "delivered" && !order.isDelivered) return false;
+
+        // Filter by search term
+        if (searchTerm.trim() !== "") {
+            const search = searchTerm.toLowerCase();
+            return (
+                order._id.toLowerCase().includes(search) ||
+                order.user?.name?.toLowerCase().includes(search) ||
+                order.user?.email?.toLowerCase().includes(search)
+            );
+        }
+
+        return true;
+    });
+
+    // Calculate statistics
+    const stats = {
+        total: orders.length,
+        pending: orders.filter(o => !o.isDelivered).length,
+        delivered: orders.filter(o => o.isDelivered).length,
+        totalRevenue: orders.reduce((sum, o) => sum + o.totalPrice, 0)
+    };
+
     if (loading) {
         return (
             <section className="admin-products">
@@ -79,10 +108,106 @@ const AdminOrders = () => {
         <section className="admin-products">
             <SectionHeader title="Manage Orders" subtitle="Admin Panel" />
 
-            {orders.length === 0 ? (
-                <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
+            {/* Statistics Cards */}
+            <div className="cards-row" style={{ marginBottom: "2rem" }}>
+                <div className="panel" style={{ flex: 1, textAlign: "center" }}>
+                    <h3>📦 Total Orders</h3>
+                    <p className="price-tag">{stats.total}</p>
+                </div>
+                <div className="panel" style={{ flex: 1, textAlign: "center" }}>
+                    <h3>⏳ Pending</h3>
+                    <p className="price-tag" style={{ color: "#f59e0b" }}>{stats.pending}</p>
+                </div>
+                <div className="panel" style={{ flex: 1, textAlign: "center" }}>
+                    <h3>✅ Delivered</h3>
+                    <p className="price-tag" style={{ color: "#10b981" }}>{stats.delivered}</p>
+                </div>
+                <div className="panel" style={{ flex: 1, textAlign: "center" }}>
+                    <h3>💰 Total Revenue</h3>
+                    <p className="price-tag">${stats.totalRevenue.toFixed(2)}</p>
+                </div>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="panel" style={{ marginBottom: "2rem" }}>
+                <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+                    {/* Search */}
+                    <div style={{ flex: "1 1 300px" }}>
+                        <label>
+                            Search Orders
+                            <input
+                                type="text"
+                                placeholder="Search by Order ID, customer name, or email..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ marginTop: "0.5rem" }}
+                            />
+                        </label>
+                    </div>
+
+                    {/* Filter Tabs */}
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <button
+                            onClick={() => setFilterStatus("all")}
+                            style={{
+                                padding: "0.75rem 1.5rem",
+                                background: filterStatus === "all" ? "var(--color-primary)" : "transparent",
+                                color: filterStatus === "all" ? "#fff" : "var(--color-text)",
+                                border: `2px solid ${filterStatus === "all" ? "var(--color-primary)" : "var(--color-border)"}`,
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                fontWeight: filterStatus === "all" ? "600" : "400",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            All ({stats.total})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus("pending")}
+                            style={{
+                                padding: "0.75rem 1.5rem",
+                                background: filterStatus === "pending" ? "#f59e0b" : "transparent",
+                                color: filterStatus === "pending" ? "#fff" : "var(--color-text)",
+                                border: `2px solid ${filterStatus === "pending" ? "#f59e0b" : "var(--color-border)"}`,
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                fontWeight: filterStatus === "pending" ? "600" : "400",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            ⏳ Pending ({stats.pending})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus("delivered")}
+                            style={{
+                                padding: "0.75rem 1.5rem",
+                                background: filterStatus === "delivered" ? "#10b981" : "transparent",
+                                color: filterStatus === "delivered" ? "#fff" : "var(--color-text)",
+                                border: `2px solid ${filterStatus === "delivered" ? "#10b981" : "var(--color-border)"}`,
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                fontWeight: filterStatus === "delivered" ? "600" : "400",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            ✅ Delivered ({stats.delivered})
+                        </button>
+                    </div>
+                </div>
+
+                <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "var(--color-text-muted)" }}>
+                    Showing {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+                </p>
+            </div>
+
+            {/* Orders Table */}
+            {filteredOrders.length === 0 ? (
+                <div className="panel" style={{ padding: "3rem", textAlign: "center" }}>
+                    <p style={{ fontSize: "3rem", marginBottom: "1rem" }}>📦</p>
                     <h3>No orders found</h3>
-                    <p>Orders will appear here once customers start purchasing.</p>
+                    <p className="muted">
+                        {searchTerm ? "Try adjusting your search" : "Orders will appear here once customers start purchasing."}
+                    </p>
                 </div>
             ) : (
                 <div className="panel" style={{ overflowX: "auto" }}>
@@ -99,7 +224,7 @@ const AdminOrders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.map((order) => (
+                            {filteredOrders.map((order) => (
                                 <>
                                     <tr
                                         key={order._id}

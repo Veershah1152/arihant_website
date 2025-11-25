@@ -1,4 +1,5 @@
 
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./App.css";
@@ -6,6 +7,7 @@ import MainNav from "./components/navigation/MainNav";
 import SiteFooter from "./components/footers/SiteFooter";
 import Homepage from "./pages/Homepage";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import ProductList from "./pages/ProductList";
 import ProductDetail from "./pages/ProductDetail";
 import LoginPage from "./pages/LoginPage";
@@ -24,6 +26,7 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminBanners from "./pages/admin/AdminBanners";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminCollections from "./pages/admin/AdminCollections";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -45,6 +48,7 @@ function App() {
                     {/* Public Routes */}
                     <Route path="/" element={<Homepage />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
                     <Route path="/shop" element={<ProductList />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/login" element={<LoginPage />} />
@@ -53,6 +57,7 @@ function App() {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/order-success/:id" element={<OrderSuccess />} />
                     <Route path="/legal" element={<LegalPolicies />} />
+
 
                     {/* User Protected Route */}
                     <Route element={<ProtectedRoute />}>
@@ -70,6 +75,7 @@ function App() {
                       <Route path="/admin/banners" element={<AdminBanners />} />
                       <Route path="/admin/reviews" element={<AdminReviews />} />
                       <Route path="/admin/coupons" element={<AdminCoupons />} />
+                      <Route path="/admin/collections" element={<AdminCollections />} />
                     </Route>
                   </Routes>
                 </main>

@@ -1,8 +1,11 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
+import AuthContext from "./AuthContext";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+    const { user } = useContext(AuthContext);
+
     const [cartItems, setCartItems] = useState(
         localStorage.getItem("cartItems")
             ? JSON.parse(localStorage.getItem("cartItems"))
@@ -18,6 +21,30 @@ export const CartProvider = ({ children }) => {
         localStorage.setItem("cartItems", JSON.stringify(cartItems));
         localStorage.setItem("coupon", JSON.stringify(coupon));
     }, [cartItems, coupon]);
+
+    // Clear coupon on logout
+    useEffect(() => {
+        if (!user && coupon) {
+            setCoupon(null);
+        }
+    }, [user]);
+
+    // Re-validate coupon when cart changes
+    useEffect(() => {
+        if (coupon && cartItems.length > 0) {
+            const subtotal = cartItems.reduce((sum, item) => sum + item.qty * item.price, 0);
+
+            // If cart total is below minimum purchase amount, remove coupon
+            if (coupon.minPurchaseAmount && subtotal < coupon.minPurchaseAmount) {
+                setCoupon(null);
+            }
+        }
+
+        // If cart is empty, remove coupon
+        if (cartItems.length === 0 && coupon) {
+            setCoupon(null);
+        }
+    }, [cartItems]);
 
     const addToCart = (product, qty) => {
         const existItem = cartItems.find((x) => x.product === product._id);

@@ -7,26 +7,10 @@ import HeroBanner from "../components/hero/HeroBanner";
 import { FeatureSteps } from "../components/others/FeatureSteps";
 import api from "../utils/api";
 
-const collectionHighlights = [
-  {
-    title: "The Grand Lodge",
-    description: "Earthy ceramics, antique brass, and wooden inlays.",
-    swatch: "#c79a6b",
-  },
-  {
-    title: "Crystalware",
-    description: "Cut glass silhouettes that glow after dusk.",
-    swatch: "#d9c6b0",
-  },
-  {
-    title: "Petit Jardin",
-    description: "Botanical accents for mindful corners.",
-    swatch: "#a7c4a0",
-  },
-];
-
 const Homepage = () => {
   const [trendingProducts, setTrendingProducts] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [loadingCollections, setLoadingCollections] = useState(true);
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -39,7 +23,20 @@ const Homepage = () => {
         console.error("Failed to fetch trending products", err);
       }
     };
+
+    const fetchCollections = async () => {
+      try {
+        const { data } = await api.get("/collections");
+        setCollections(data);
+        setLoadingCollections(false);
+      } catch (err) {
+        console.error("Failed to fetch collections", err);
+        setLoadingCollections(false);
+      }
+    };
+
     fetchTrending();
+    fetchCollections();
   }, []);
 
   return (
@@ -53,20 +50,44 @@ const Homepage = () => {
           action={<Link to="/shop"><PrimaryButton variant="ghost">View all collections</PrimaryButton></Link>}
         />
 
-        <div className="collection-grid">
-          {collectionHighlights.map((collection) => (
-            <article key={collection.title} className="collection-card">
-              <div
-                className="collection-card__image"
-                style={{ backgroundColor: collection.swatch }}
-              />
-              <div>
-                <h3>{collection.title}</h3>
-                <p className="muted">{collection.description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {loadingCollections ? (
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            <p>Loading collections...</p>
+          </div>
+        ) : collections.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            <p className="muted">No collections available yet.</p>
+          </div>
+        ) : (
+          <div className="collection-grid">
+            {collections.map((collection) => (
+              <Link
+                key={collection._id}
+                to={`/shop?category=${collection.category}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <article className="collection-card">
+                  <div className="collection-card__image-wrapper">
+                    <img
+                      src={collection.image.url}
+                      alt={collection.title}
+                      className="collection-card__image"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="collection-card__content">
+                    <h3>{collection.title}</h3>
+                    <p className="muted">{collection.description}</p>
+                    <div className="collection-card__footer">
+                      <span className="muted">{collection.productCount} products</span>
+                      <span className="collection-card__arrow">→</span>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="page-section">

@@ -8,6 +8,7 @@ const navLinks = [
   { path: "/", label: "Home" },
   { path: "/shop", label: "Collection" },
   { path: "/about", label: "About" },
+  { path: "/contact", label: "Contact" },
 ];
 
 const MainNav = () => {
@@ -46,7 +47,7 @@ const MainNav = () => {
 
         {user ? (
           <>
-            <Link to="/Dashboard">UserDashboard</Link>
+            <Link to="/Dashboard">Profile</Link>
             <button onClick={logout} className="logout-btn">
               Logout
             </button>

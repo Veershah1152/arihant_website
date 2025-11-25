@@ -12,6 +12,10 @@ const protect = asyncHandler(async (req, res, next) => {
         try {
             token = req.headers.authorization.split(" ")[1];
 
+            if (!token || token === "undefined" || token === "null") {
+                throw new Error("Token missing or invalid");
+            }
+
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             req.user = await User.findById(decoded.id).select("-password");

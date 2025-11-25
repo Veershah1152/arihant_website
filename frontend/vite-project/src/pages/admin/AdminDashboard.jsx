@@ -10,7 +10,8 @@ const AdminDashboard = () => {
     const adminCards = [
         { title: "Products", path: "/admin/products", icon: "📦", desc: "Manage products" },
         { title: "Banners", path: "/admin/banners", icon: "🖼️", desc: "Manage hero banners" },
-        { title: "Analytics", path: "/admin/analytics", icon: "bar_chart", desc: "View site stats" },
+        { title: "Collections", path: "/admin/collections", icon: "🎨", desc: "Manage homepage collections" },
+        { title: "Analytics", path: "/admin/analytics", icon: "📊", desc: "View site stats" },
         { title: "Orders", path: "/admin/orders", icon: "📋", desc: "View orders" },
         { title: "Users", path: "/admin/users", icon: "👥", desc: "Manage users" },
         { title: "Reviews", path: "/admin/reviews", icon: "⭐", desc: "View product reviews" },

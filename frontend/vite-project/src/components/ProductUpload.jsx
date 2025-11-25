@@ -14,7 +14,7 @@ const handleSubmit = async (e) => {
     form.append("images", files[i]); // <-- IMPORTANT
   }
 
-  const res = await fetch("http://localhost:5000/api/products", {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/products`, {
     method: "POST",
     body: form,
   });

@@ -37,6 +37,15 @@ const addOrderItems = asyncHandler(async (req, res) => {
 
         const createdOrder = await order.save();
 
+        // Increment coupon usedCount if a coupon was used
+        if (couponCode) {
+            const Coupon = (await import("../models/Coupon.js")).default;
+            await Coupon.findOneAndUpdate(
+                { code: couponCode },
+                { $inc: { usedCount: 1 } }
+            );
+        }
+
         res.status(201).json(createdOrder);
     }
 });

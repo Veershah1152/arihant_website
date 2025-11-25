@@ -23,6 +23,26 @@ const couponSchema = mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        minPurchaseAmount: {
+            type: Number,
+            default: 0,
+        },
+        maxDiscountAmount: {
+            type: Number,
+            default: null,
+        },
+        usageLimit: {
+            type: Number,
+            default: null, // Total times coupon can be used by everyone
+        },
+        usedCount: {
+            type: Number,
+            default: 0,
+        },
+        userUsageLimit: {
+            type: Number,
+            default: null, // Times a single user can use it
+        },
     },
     {
         timestamps: true,

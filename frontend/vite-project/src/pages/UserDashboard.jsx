@@ -46,6 +46,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [activeTab, setActiveTab] = useState("profile");
 
   // Profile Form State
   const [name, setName] = useState("");
@@ -68,9 +69,7 @@ const UserDashboard = () => {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
-        'callback': (response) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
+        'callback': (response) => { }
       });
     }
   };
@@ -81,9 +80,9 @@ const UserDashboard = () => {
       return;
     }
 
-    let formattedNumber = phoneNumber.replace(/\D/g, ''); // Remove non-digits
+    let formattedNumber = phoneNumber.replace(/\D/g, '');
     if (formattedNumber.length === 10) {
-      formattedNumber = `+91${formattedNumber}`; // Default to India if 10 digits
+      formattedNumber = `+91${formattedNumber}`;
     } else if (!phoneNumber.startsWith("+")) {
       formattedNumber = `+${formattedNumber}`;
     } else {
@@ -92,7 +91,7 @@ const UserDashboard = () => {
 
     setError(null);
     setMessage(null);
-    setPhoneNumber(formattedNumber); // Update state with formatted number
+    setPhoneNumber(formattedNumber);
     generateRecaptcha();
     const appVerifier = window.recaptchaVerifier;
     signInWithPhoneNumber(auth, formattedNumber, appVerifier)
@@ -113,7 +112,6 @@ const UserDashboard = () => {
         setIsVerified(true);
         setOtpSent(false);
 
-        // Auto-save verified phone number AND address
         try {
           const fullAddress = (address || selectedDistrict || selectedState)
             ? `${address}, ${selectedDistrict}, ${selectedState}`
@@ -162,7 +160,6 @@ const UserDashboard = () => {
       if (user.address) {
         const parts = user.address.split(", ");
         if (parts.length >= 3) {
-          // Assuming format: "Address, District, State"
           const state = parts[parts.length - 1];
           const district = parts[parts.length - 2];
           const addr = parts.slice(0, parts.length - 2).join(", ");
@@ -180,10 +177,6 @@ const UserDashboard = () => {
       }
     }
   }, [user]);
-
-  // ... (fetchData useEffect remains same)
-
-
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -256,250 +249,390 @@ const UserDashboard = () => {
     }
   };
 
-
+  // Calculate profile completion
+  const profileCompletion = () => {
+    let completed = 0;
+    let total = 4;
+    if (user?.name) completed++;
+    if (user?.email) completed++;
+    if (user?.phoneVerified) completed++;
+    if (user?.address) completed++;
+    return Math.round((completed / total) * 100);
+  };
 
   return (
     <section id="user-dashboard" className="page-section">
-      <SectionHeader
-        title={`User Profile`}
-        subtitle="Manage your account"
-        action={<Badge tone="success">Member</Badge>}
-      />
+      {/* Welcome Banner */}
+      <div className="panel" style={{
+        background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+        color: '#fff',
+        marginBottom: '2rem',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h2 style={{ color: '#fff', marginBottom: '0.5rem', fontSize: '2rem' }}>
+            Welcome back, {user?.name || 'User'}! 👋
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.1rem' }}>
+            Manage your profile, orders, and wishlist all in one place
+          </p>
+        </div>
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+        }}></div>
+      </div>
 
-      <div className="two-column">
-        {/* Profile Update Form */}
-        <div className="panel">
-          <h3>Update Profile</h3>
-          {message && <p style={{ color: "green" }}>{message}</p>}
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          <form onSubmit={submitHandler} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <div>
-              <label>Name</label>
-              <input
-                type="text"
-                placeholder="Enter name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-              />
-            </div>
-            <div>
-              <label>Email Address</label>
-              <input
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-              />
-            </div>
-            <div>
-              <label>State</label>
-              <select
-                value={selectedState}
-                onChange={(e) => {
-                  setSelectedState(e.target.value);
-                  setSelectedDistrict(""); // Reset district when state changes
-                }}
-                style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-                disabled={!!user?.address}
-              >
-                <option value="">Select State</option>
-                {Object.keys(indianStatesAndDistricts).map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Profile Completion Progress */}
+      <div className="panel" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div>
+            <h4>Profile Completion</h4>
+            <p className="muted" style={{ fontSize: '0.9rem' }}>Complete your profile to unlock all features</p>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>
+            {profileCompletion()}%
+          </div>
+        </div>
+        <div style={{
+          width: '100%',
+          height: '12px',
+          background: 'var(--color-border)',
+          borderRadius: '100px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: `${profileCompletion()}%`,
+            height: '100%',
+            background: 'linear-gradient(90deg, var(--color-primary), var(--color-primary-dark))',
+            transition: 'width 0.3s ease',
+            borderRadius: '100px'
+          }}></div>
+        </div>
+      </div>
 
-            <div>
-              <label>District</label>
-              <select
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-                disabled={!selectedState || !!user?.address}
-              >
-                <option value="">Select District</option>
-                {selectedState &&
-                  indianStatesAndDistricts[selectedState]?.map((district) => (
-                    <option key={district} value={district}>
-                      {district}
-                    </option>
-                  ))}
-              </select>
-            </div>
+      {/* Tab Navigation */}
+      <div style={{
+        display: 'flex',
+        gap: '1rem',
+        marginBottom: '2rem',
+        borderBottom: '2px solid var(--color-border)',
+        flexWrap: 'wrap'
+      }}>
+        {[
+          { id: 'profile', label: '👤 Profile', icon: '👤' },
+          { id: 'orders', label: '📦 Orders', icon: '📦' },
+          { id: 'wishlist', label: '❤️ Wishlist', icon: '❤️' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: '1rem 1.5rem',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === tab.id ? '3px solid var(--color-primary)' : '3px solid transparent',
+              color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-muted)',
+              fontWeight: activeTab === tab.id ? '600' : '400',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              fontSize: '1rem',
+              marginBottom: '-2px'
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-            <div>
-              <label>Full Address</label>
-              <input
-                type="text"
-                placeholder="House No, Street, Area"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-                disabled={!!user?.address}
-              />
-            </div>
-            <div>
-              <label>Phone Number</label>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+      {/* Tab Content */}
+      {activeTab === 'profile' && (
+        <div className="two-column">
+          {/* Profile Update Form */}
+          <div className="panel">
+            <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              ✏️ Update Profile
+            </h3>
+            {message && <div style={{ padding: '1rem', background: 'rgba(34, 197, 94, 0.1)', color: '#15803d', borderRadius: '8px', marginBottom: '1rem' }}>{message}</div>}
+            {error && <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', color: '#991b1b', borderRadius: '8px', marginBottom: '1rem' }}>{error}</div>}
+
+            <form onSubmit={submitHandler} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <label>
+                Name
                 <input
                   type="text"
-                  placeholder="Enter phone number (+91...)"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  style={{ flex: 1, padding: "0.5rem", marginTop: "0.25rem" }}
-                  disabled={isVerified || otpSent || !!user?.phoneVerified}
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
-                {!isVerified && (
-                  <button
-                    type="button"
-                    onClick={handleSendOtp}
-                    className="btn btn-secondary"
-                    style={{ marginTop: "0.25rem" }}
-                  >
-                    {otpSent ? "Resend OTP" : "Verify"}
-                  </button>
-                )}
-              </div>
-              <div id="recaptcha-container"></div>
-            </div>
+              </label>
 
-            {otpSent && !isVerified && (
-              <div>
-                <label>Enter OTP</label>
+              <label>
+                Email Address
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
+
+              <label>
+                State
+                <select
+                  value={selectedState}
+                  onChange={(e) => {
+                    setSelectedState(e.target.value);
+                    setSelectedDistrict("");
+                  }}
+                  disabled={!!user?.address}
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(indianStatesAndDistricts).map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                District
+                <select
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  disabled={!selectedState || !!user?.address}
+                >
+                  <option value="">Select District</option>
+                  {selectedState &&
+                    indianStatesAndDistricts[selectedState]?.map((district) => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                </select>
+              </label>
+
+              <label>
+                Full Address
+                <input
+                  type="text"
+                  placeholder="House No, Street, Area"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  disabled={!!user?.address}
+                />
+              </label>
+
+              <label>
+                Phone Number
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <input
                     type="text"
-                    placeholder="Enter 6-digit OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    style={{ flex: 1, padding: "0.5rem", marginTop: "0.25rem" }}
+                    placeholder="Enter phone number (+91...)"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    style={{ flex: 1 }}
+                    disabled={isVerified || otpSent || !!user?.phoneVerified}
                   />
-                  <button
-                    type="button"
-                    onClick={handleVerifyOtp}
-                    className="btn btn-success"
-                    style={{ marginTop: "0.25rem" }}
-                  >
-                    Confirm
-                  </button>
+                  {!isVerified && !user?.phoneVerified && (
+                    <PrimaryButton
+                      type="button"
+                      onClick={handleSendOtp}
+                      variant="outline"
+                    >
+                      {otpSent ? "Resend OTP" : "Verify"}
+                    </PrimaryButton>
+                  )}
+                </div>
+                <div id="recaptcha-container"></div>
+              </label>
+
+              {otpSent && !isVerified && (
+                <label>
+                  Enter OTP
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      style={{ flex: 1 }}
+                      maxLength="6"
+                    />
+                    <PrimaryButton
+                      type="button"
+                      onClick={handleVerifyOtp}
+                    >
+                      Confirm
+                    </PrimaryButton>
+                  </div>
+                </label>
+              )}
+
+              {(isVerified || user?.phoneVerified) && (
+                <div style={{ padding: '1rem', background: 'rgba(34, 197, 94, 0.1)', color: '#15803d', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  ✓ Phone Number Verified
+                </div>
+              )}
+
+              <PrimaryButton type="submit">Update Profile</PrimaryButton>
+            </form>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {/* Account Stats */}
+            <div className="panel">
+              <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                📊 Account Stats
+              </h3>
+              <div className="stats-grid">
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(139, 94, 60, 0.05)', borderRadius: '8px' }}>
+                  <p className="muted" style={{ fontSize: '0.9rem' }}>Total Orders</p>
+                  <strong style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>{orders?.length || 0}</strong>
+                </div>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(139, 94, 60, 0.05)', borderRadius: '8px' }}>
+                  <p className="muted" style={{ fontSize: '0.9rem' }}>Wishlist Items</p>
+                  <strong style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>{wishlist?.length || 0}</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Saved Information */}
+            {(user?.phoneVerified || user?.address) && (
+              <div className="panel">
+                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  💾 Saved Information
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {user?.phoneVerified && user?.phoneNumber && (
+                    <div className="list-item">
+                      <span className="muted">📱 Phone Number</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <strong>{user.phoneNumber}</strong>
+                        <Badge tone="success">✓ Verified</Badge>
+                      </div>
+                    </div>
+                  )}
+                  {user?.address && (
+                    <div className="list-item">
+                      <span className="muted">📍 Address</span>
+                      <strong style={{ textAlign: 'right' }}>{user.address}</strong>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-
-            {isVerified && <p style={{ color: "green", marginTop: "0.5rem" }}>✓ Phone Number Verified</p>}
-            <PrimaryButton type="submit">Update</PrimaryButton>
-          </form>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-          {/* Saved Information Panel */}
-          {(user?.phoneVerified || user?.address) && (
-            <div className="panel">
-              <h3>Saved Information</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
-                {user?.phoneVerified && user?.phoneNumber && (
-                  <div className="list-item">
-                    <span className="muted">Phone Number</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <strong>{user.phoneNumber}</strong>
-                      <Badge tone="success">✓ Verified</Badge>
-                    </div>
-                  </div>
-                )}
-                {user?.address && (
-                  <div className="list-item">
-                    <span className="muted">Address</span>
-                    <strong>{user.address}</strong>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="panel stats-grid">
-            <div>
-              <p className="muted">Total Orders</p>
-              <strong>{orders?.length || 0}</strong>
-            </div>
-            <div>
-              <p className="muted">Account Status</p>
-              <strong>Active</strong>
-            </div>
           </div>
+        </div>
+      )}
 
-          <div className="panel">
-            <h3>Order History</h3>
-            {loading ? (
-              <p>Loading orders...</p>
-            ) : orders?.length === 0 ? (
-              <p>No orders found.</p>
-            ) : (
-              <ul className="list" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                {orders?.map((order) => (
-                  <li key={order._id} className="list-item">
+      {activeTab === 'orders' && (
+        <div className="panel">
+          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            📦 Order History
+          </h3>
+          {loading ? (
+            <p>Loading orders...</p>
+          ) : orders?.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</p>
+              <h4>No orders yet</h4>
+              <p className="muted">Start shopping to see your orders here</p>
+              <Link to="/shop" style={{ marginTop: '1rem', display: 'inline-block' }}>
+                <PrimaryButton>Browse Products</PrimaryButton>
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {orders?.map((order) => (
+                <div key={order._id} className="panel" style={{ background: 'var(--color-surface-glass)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                     <div>
-                      <strong>Order #{order._id.substring(0, 8)}</strong>
-                      <p className="muted">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                      <strong style={{ fontSize: '1.1rem' }}>Order #{order._id.substring(0, 8)}</strong>
+                      <p className="muted" style={{ marginTop: '0.25rem' }}>
+                        {new Date(order.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
                       </p>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <p><strong>${order.totalPrice.toFixed(2)}</strong></p>
+                    <div style={{ textAlign: 'right' }}>
+                      <p className="price-tag" style={{ fontSize: '1.5rem' }}>${order.totalPrice.toFixed(2)}</p>
                       <Badge tone={order.isPaid ? "success" : "warning"}>
-                        {order.isPaid ? "Paid" : "Unpaid"}
+                        {order.isPaid ? "✓ Paid" : "⏳ Unpaid"}
                       </Badge>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="panel">
-            <h3>My Wishlist</h3>
-            {loading ? (
-              <p>Loading wishlist...</p>
-            ) : wishlist?.length === 0 ? (
-              <p>Your wishlist is empty.</p>
-            ) : (
-              <ul className="list" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                {wishlist?.map((item) => (
-                  <li key={item._id} className="list-item">
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                      {item.images && item.images[0] && (
-                        <img
-                          src={item.images[0].url}
-                          alt={item.name}
-                          style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4 }}
-                        />
-                      )}
-                      <div>
-                        <strong>{item.name}</strong>
-                        <p>${item.price}</p>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link to={`/product/${item._id}`} className="btn btn-sm btn-secondary">
-                        View
-                      </Link>
-                      <button
-                        onClick={() => removeFromWishlist(item._id)}
-                        className="btn btn-sm btn-danger"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
+                    <Badge tone={order.isDelivered ? "success" : "info"}>
+                      {order.isDelivered ? "✓ Delivered" : "🚚 In Transit"}
+                    </Badge>
+                    <span className="muted">{order.orderItems?.length || 0} items</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
+
+      {activeTab === 'wishlist' && (
+        <div className="panel">
+          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            ❤️ My Wishlist
+          </h3>
+          {loading ? (
+            <p>Loading wishlist...</p>
+          ) : wishlist?.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>❤️</p>
+              <h4>Your wishlist is empty</h4>
+              <p className="muted">Save items you love for later</p>
+              <Link to="/shop" style={{ marginTop: '1rem', display: 'inline-block' }}>
+                <PrimaryButton>Browse Products</PrimaryButton>
+              </Link>
+            </div>
+          ) : (
+            <div className="product-grid">
+              {wishlist?.map((item) => (
+                <div key={item._id} className="panel" style={{ background: 'var(--color-surface-glass)', padding: '1rem' }}>
+                  {item.images && item.images[0] && (
+                    <img
+                      src={item.images[0].url}
+                      alt={item.name}
+                      style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem' }}
+                    />
+                  )}
+                  <h4 style={{ marginBottom: '0.5rem' }}>{item.name}</h4>
+                  <p className="price-tag" style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>${item.price}</p>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Link to={`/product/${item._id}`} style={{ flex: 1 }}>
+                      <PrimaryButton style={{ width: '100%' }}>View</PrimaryButton>
+                    </Link>
+                    <button
+                      onClick={() => removeFromWishlist(item._id)}
+                      style={{
+                        padding: '0.75rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#dc2626',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 };

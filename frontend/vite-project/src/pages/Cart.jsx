@@ -27,6 +27,10 @@ const Cart = () => {
   const total = subtotal + shipping + tax - discountAmount;
 
   const handleApplyCoupon = async () => {
+    if (!user) {
+      setCouponError("Please login to apply a coupon");
+      return;
+    }
     if (!couponCode) return;
     try {
       const config = {
@@ -34,7 +38,10 @@ const Cart = () => {
           Authorization: `Bearer ${user?.token}`,
         },
       };
-      const { data } = await api.post("/coupons/validate", { code: couponCode }, config);
+      const { data } = await api.post("/coupons/validate", {
+        code: couponCode,
+        cartTotal: subtotal
+      }, config);
       applyCoupon(data);
       setCouponError("");
       setCouponCode("");

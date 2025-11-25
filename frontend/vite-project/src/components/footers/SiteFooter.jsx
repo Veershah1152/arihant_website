@@ -41,9 +41,23 @@ const SiteFooter = () => (
         By using our site, you agree to our <Link to="/legal">Terms & Conditions</Link>, <Link to="/legal">Privacy Policy</Link>, and <Link to="/legal">Shipping & Refund Policies</Link>.
         For support, contact us at <a href="mailto:arihantsilver@gmail.com">arihantsilver@gmail.com</a>.
       </p>
+
+      {/* Developer Credit */}
+      <p className="muted" style={{
+        fontSize: "0.85rem",
+        marginTop: "1rem",
+        paddingTop: "0.75rem",
+        borderTop: "1px solid rgba(139, 94, 60, 0.1)",
+        textAlign: "center",
+        opacity: 0.85
+      }}>
+        Website developed by <strong style={{ color: "var(--color-primary)" }}>Veer Shah</strong> •
+        <a href="tel:9527761897" style={{ marginLeft: "0.5rem", color: "inherit", textDecoration: "none" }}>
+          📞 9527761897
+        </a>
+      </p>
     </div>
   </footer>
 );
 
 export default SiteFooter;
-

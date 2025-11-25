@@ -14,6 +14,10 @@ const AdminCoupons = () => {
     const [code, setCode] = useState("");
     const [discount, setDiscount] = useState("");
     const [expirationDate, setExpirationDate] = useState("");
+    const [minPurchaseAmount, setMinPurchaseAmount] = useState("");
+    const [maxDiscountAmount, setMaxDiscountAmount] = useState("");
+    const [usageLimit, setUsageLimit] = useState("");
+    const [userUsageLimit, setUserUsageLimit] = useState("");
     const [creating, setCreating] = useState(false);
 
     useEffect(() => {
@@ -40,7 +44,11 @@ const AdminCoupons = () => {
             await api.post("/coupons", {
                 code,
                 discount: Number(discount),
-                expirationDate
+                expirationDate,
+                minPurchaseAmount: minPurchaseAmount ? Number(minPurchaseAmount) : 0,
+                maxDiscountAmount: maxDiscountAmount ? Number(maxDiscountAmount) : null,
+                usageLimit: usageLimit ? Number(usageLimit) : null,
+                userUsageLimit: userUsageLimit ? Number(userUsageLimit) : null
             }, {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
@@ -48,6 +56,10 @@ const AdminCoupons = () => {
             setCode("");
             setDiscount("");
             setExpirationDate("");
+            setMinPurchaseAmount("");
+            setMaxDiscountAmount("");
+            setUsageLimit("");
+            setUserUsageLimit("");
             fetchCoupons();
             alert("Coupon created successfully!");
         } catch (error) {
@@ -112,6 +124,46 @@ const AdminCoupons = () => {
                             required
                         />
                     </label>
+                    <label>
+                        Minimum Purchase Amount ($)
+                        <input
+                            type="number"
+                            placeholder="e.g. 100 (optional)"
+                            value={minPurchaseAmount}
+                            onChange={(e) => setMinPurchaseAmount(e.target.value)}
+                            min="0"
+                        />
+                    </label>
+                    <label>
+                        Maximum Discount Amount ($)
+                        <input
+                            type="number"
+                            placeholder="e.g. 50 (optional)"
+                            value={maxDiscountAmount}
+                            onChange={(e) => setMaxDiscountAmount(e.target.value)}
+                            min="0"
+                        />
+                    </label>
+                    <label>
+                        Total Usage Limit
+                        <input
+                            type="number"
+                            placeholder="e.g. 100 (optional)"
+                            value={usageLimit}
+                            onChange={(e) => setUsageLimit(e.target.value)}
+                            min="1"
+                        />
+                    </label>
+                    <label>
+                        Per User Usage Limit
+                        <input
+                            type="number"
+                            placeholder="e.g. 1 (optional)"
+                            value={userUsageLimit}
+                            onChange={(e) => setUserUsageLimit(e.target.value)}
+                            min="1"
+                        />
+                    </label>
                     <div style={{ marginTop: "0.5rem" }}>
                         <PrimaryButton disabled={creating}>
                             {creating ? "Creating..." : "Create Coupon"}
@@ -126,6 +178,9 @@ const AdminCoupons = () => {
                     <tr>
                         <th>Code</th>
                         <th>Discount</th>
+                        <th>Min Purchase</th>
+                        <th>Max Discount</th>
+                        <th>Usage</th>
                         <th>Expires</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -136,6 +191,9 @@ const AdminCoupons = () => {
                         <tr key={c._id}>
                             <td><strong>{c.code}</strong></td>
                             <td>{c.discount}%</td>
+                            <td>${c.minPurchaseAmount || 0}</td>
+                            <td>{c.maxDiscountAmount ? `$${c.maxDiscountAmount}` : 'No cap'}</td>
+                            <td>{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ''} {c.userUsageLimit ? `(${c.userUsageLimit}/user)` : ''}</td>
                             <td>{new Date(c.expirationDate).toLocaleDateString()}</td>
                             <td>
                                 {new Date(c.expirationDate) > new Date() ? (
