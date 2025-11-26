@@ -5,8 +5,6 @@ import api from "../utils/api";
 import SectionHeader from "../components/others/SectionHeader";
 import Badge from "../components/others/Badge";
 import PrimaryButton from "../components/buttons/PrimaryButton";
-import { auth } from "../firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const indianStatesAndDistricts = {
   "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
@@ -60,102 +58,11 @@ const UserDashboard = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
 
-  // OTP State
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
-
-  const generateRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => { }
-      });
-    }
-  };
-
-  const handleSendOtp = () => {
-    if (!phoneNumber) {
-      setError("Please enter a phone number");
-      return;
-    }
-
-    let formattedNumber = phoneNumber.replace(/\D/g, '');
-    if (formattedNumber.length === 10) {
-      formattedNumber = `+91${formattedNumber}`;
-    } else if (!phoneNumber.startsWith("+")) {
-      formattedNumber = `+${formattedNumber}`;
-    } else {
-      formattedNumber = phoneNumber;
-    }
-
-    setError(null);
-    setMessage(null);
-    setPhoneNumber(formattedNumber);
-    generateRecaptcha();
-    const appVerifier = window.recaptchaVerifier;
-    signInWithPhoneNumber(auth, formattedNumber, appVerifier)
-      .then((confirmationResult) => {
-        window.confirmationResult = confirmationResult;
-        setOtpSent(true);
-        setMessage(`OTP Sent to ${formattedNumber}`);
-      }).catch((error) => {
-        console.error(error);
-        setError(error.message || "Failed to send OTP. Please check the number and try again.");
-      });
-  };
-
-  const handleVerifyOtp = () => {
-    if (otp.length === 6) {
-      let confirmationResult = window.confirmationResult;
-      confirmationResult.confirm(otp).then(async (result) => {
-        setIsVerified(true);
-        setOtpSent(false);
-
-        try {
-          const fullAddress = (address || selectedDistrict || selectedState)
-            ? `${address}, ${selectedDistrict}, ${selectedState}`
-            : undefined;
-
-          const payload = { id: user._id, phoneNumber, phoneVerified: true };
-          if (fullAddress) {
-            payload.address = fullAddress;
-          }
-
-          const config = {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          };
-          const { data } = await api.put(
-            "/users/profile",
-            payload,
-            config
-          );
-          updateUser(data);
-          setMessage("Phone Number Verified and Profile Saved!");
-        } catch (saveError) {
-          console.error("Error saving profile:", saveError);
-          setMessage("Phone Verified, but failed to save to profile. Please click Update.");
-        }
-
-        setError(null);
-      }).catch((error) => {
-        setError("Invalid OTP");
-      });
-    } else {
-      setError("Please enter a 6-digit OTP");
-    }
-  };
-
   useEffect(() => {
     if (user) {
       setName(user.name || "");
       setEmail(user.email || "");
       setPhoneNumber(user.phoneNumber || "");
-      if (user.phoneVerified) {
-        setIsVerified(true);
-      }
 
       if (user.address) {
         const parts = user.address.split(", ");
@@ -255,7 +162,7 @@ const UserDashboard = () => {
     let total = 4;
     if (user?.name) completed++;
     if (user?.email) completed++;
-    if (user?.phoneVerified) completed++;
+    if (user?.phoneNumber) completed++;
     if (user?.address) completed++;
     return Math.round((completed / total) * 100);
   };
@@ -427,55 +334,13 @@ const UserDashboard = () => {
 
               <label>
                 Phone Number
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input
-                    type="text"
-                    placeholder="Enter phone number (+91...)"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    style={{ flex: 1 }}
-                    disabled={isVerified || otpSent || !!user?.phoneVerified}
-                  />
-                  {!isVerified && !user?.phoneVerified && (
-                    <PrimaryButton
-                      type="button"
-                      onClick={handleSendOtp}
-                      variant="outline"
-                    >
-                      {otpSent ? "Resend OTP" : "Verify"}
-                    </PrimaryButton>
-                  )}
-                </div>
-                <div id="recaptcha-container"></div>
+                <input
+                  type="text"
+                  placeholder="Enter phone number (+91...)"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                />
               </label>
-
-              {otpSent && !isVerified && (
-                <label>
-                  Enter OTP
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <input
-                      type="text"
-                      placeholder="Enter 6-digit OTP"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      style={{ flex: 1 }}
-                      maxLength="6"
-                    />
-                    <PrimaryButton
-                      type="button"
-                      onClick={handleVerifyOtp}
-                    >
-                      Confirm
-                    </PrimaryButton>
-                  </div>
-                </label>
-              )}
-
-              {(isVerified || user?.phoneVerified) && (
-                <div style={{ padding: '1rem', background: 'rgba(34, 197, 94, 0.1)', color: '#15803d', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  ✓ Phone Number Verified
-                </div>
-              )}
 
               <PrimaryButton type="submit">Update Profile</PrimaryButton>
             </form>
@@ -500,19 +365,16 @@ const UserDashboard = () => {
             </div>
 
             {/* Saved Information */}
-            {(user?.phoneVerified || user?.address) && (
+            {(user?.phoneNumber || user?.address) && (
               <div className="panel">
                 <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   💾 Saved Information
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {user?.phoneVerified && user?.phoneNumber && (
+                  {user?.phoneNumber && (
                     <div className="list-item">
                       <span className="muted">📱 Phone Number</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <strong>{user.phoneNumber}</strong>
-                        <Badge tone="success">✓ Verified</Badge>
-                      </div>
+                      <strong style={{ textAlign: 'right' }}>{user.phoneNumber}</strong>
                     </div>
                   )}
                   {user?.address && (
